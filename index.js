@@ -32,7 +32,7 @@ app.use(
     })
 );
 
-app.listen(3000);
+app.listen(process.env.PORT);
 
 //Routes
 app.use('/hola', (res,req) => {
