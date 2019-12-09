@@ -34,7 +34,7 @@ router.get("/get-item", async (req, res) => {
     res.status(200).send({ get });
 });
 
-app.get('/list-to-update-meli',async  (req,res) => {
+router.get('/list-to-update-meli',async  (req,res) => {
     var items = await producto.list();
     const obj = [];
     var i = 0;
