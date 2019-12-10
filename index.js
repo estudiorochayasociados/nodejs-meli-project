@@ -6,7 +6,7 @@ const app = express();
 
 //app.use(express.json());
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://heroku_3lx09bt6:lhntctmfimmb8o0hnmtv4r8nh9@ds253428.mlab.com:53428/heroku_3lx09bt6', {
+mongoose.connect('mongodb+srv://estudiorocha:faAr2010@estudiorocha-t104t.mongodb.net/test?retryWrites=true&w=majority', {
     useCreateIndex: true,
     useNewUrlParser: true
 })
