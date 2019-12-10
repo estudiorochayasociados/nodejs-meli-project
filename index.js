@@ -6,7 +6,7 @@ const app = express();
 
 //app.use(express.json());
 const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://estudiorocha:faAr2010@estudiorocha-t104t.mongodb.net/test?retryWrites=true&w=majority', {
+mongoose.connect('mongodb://estudiorocha:faAr2010@estudiorocha-t104t.mongodb.net/test', {
     useCreateIndex: true,
     useNewUrlParser: true
 })
