@@ -5,13 +5,15 @@ const productoRoute = require("./routes/producto");
 const app = express();
 
 //app.use(express.json());
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://estudiorocha:faAr2010@estudiorocha-t104t.mongodb.net/test', {
-    useCreateIndex: true,
-    useNewUrlParser: true
-})
-    .then(db => console.log('DB connected'))
-    .catch(err => console.log(err));
+const mongoose = require('mongoose'); 
+
+mongoose.connect('mongodb+srv://estudiorocha:faAr2010@estudiorocha-t104t.mongodb.net/meli-node?retryWrites=true&w=majority', function(err, db) {
+    if (err) {
+        console.log('Unable to connect to the server. Please start the server. Error:', err);
+    } else {
+        console.log('Connected to Server successfully!');
+    }
+});
 
 //config meli
 const app_id = "5757202621369035";
@@ -32,7 +34,7 @@ app.use(
     })
 );
 
-app.listen(process.env.PORT);
+app.listen(process.env.PORT || 3000, process.env.HOST || "192.168.0.155");
 
 //Routes
 app.get('/hola', (res,req) => {
