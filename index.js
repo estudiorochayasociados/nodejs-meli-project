@@ -35,7 +35,7 @@ app.use(
 app.listen(process.env.PORT);
 
 //Routes
-app.use('/hola', (res,req) => {
+app.get('/hola', (res,req) => {
     res.json({"status": "HOLA"});
 });
 app.use('/mercadolibre', mercadolibreRoute);
