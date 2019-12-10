@@ -34,8 +34,8 @@ app.use(
     })
 );
 
-app.listen(process.env.PORT || 3000, process.env.HOST || "192.168.0.155");
-
+//app.listen(process.env.PORT || 3000, process.env.HOST || "192.168.0.155");
+app.listen(process.env.PORT);
 //Routes
 app.get('/hola', (res,req) => {
     res.json({"status": "HOLA"});
