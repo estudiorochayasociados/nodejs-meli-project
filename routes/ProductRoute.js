@@ -9,7 +9,7 @@ router.get("/getItemWeb", async (req, res) => {
 
 router.get("/", async (req, res) => {
     const get = await ProductController.list();
-    res.status(200).send({ get });
+    res.status(200).send(get);
 })
 
 router.get("/:id", async (req, res) => {

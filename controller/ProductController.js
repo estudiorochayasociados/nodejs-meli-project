@@ -12,15 +12,14 @@ exports.getItemWeb = async (link) => {
                         const images = [];
                         response.title = item.data.titulo;
                         response.description.text = item.data.desarrollo;
-                        response.description.text = item.data.desarrollo;
                         response.description.video = "https://youtu.be/HKTa9jnsoZ4";                        
                         response.stock = (item.data.stock) ? item.data.stock : 1 ;
                         response.code.web = item.data.cod;
-                        response.price.default = (item.data.precio * 1) + 5000;
+                        response.price.default = item.data.precio;
                         response.category = item.category.data.titulo;
                         response.subcategory = item.category.subcategories[0].data.titulo;
                         item.images.forEach(img => {
-                            images.push({ "source" : "https://www.morano.com.ar/" +img.ruta, "order" : img.orden} )
+                            images.push({ "source" : "https://www.morano.com.ar/" + img.ruta, "order" : img.orden} )
                         });      
                         console.log(images);
                         response.images = images;     
@@ -36,7 +35,7 @@ exports.getItemWeb = async (link) => {
                         data.description.video = "https://youtu.be/HKTa9jnsoZ4";                        
                         data.stock = (item.data.stock) ? item.data.stock : 1 ;
                         data.code.web = item.data.cod;
-                        data.price.default = (item.data.precio * 1) + 5000;
+                        data.price.default = item.data.precio;
                         data.category = item.category.data.titulo;
                         data.subcategory = item.category.subcategories[0].data.titulo;
                         item.images.forEach(img => {

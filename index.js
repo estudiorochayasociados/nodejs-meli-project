@@ -6,9 +6,6 @@ const app = express();
 const config  = require('dotenv').config();
 app.set('view options', { pretty: true });
 
-
-console.log(config.parsed);
-
 //settings
 app.set('trust proxy', 1) // trust first proxy
 app.use(
