@@ -20,8 +20,7 @@ exports.getItemWeb = async (link) => {
                         response.subcategory = item.category.subcategories[0].data.titulo;
                         item.images.forEach(img => {
                             images.push({ "source" : "https://www.morano.com.ar/" + img.ruta, "order" : img.orden} )
-                        });      
-                        console.log(images);
+                        });       
                         response.images = images;     
                         this.update(response);                        
                     } else {
@@ -40,8 +39,7 @@ exports.getItemWeb = async (link) => {
                         data.subcategory = item.category.subcategories[0].data.titulo;
                         item.images.forEach(img => {
                             images.push({ "source" : "https://www.morano.com.ar/"+img.ruta, "order" : img.orden} )
-                        });      
-                        console.log(images);
+                        });       
                         data.images = images;    
                         this.create(data);                        
                     }
