@@ -1,7 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const session = require("express-session");
-//const MongoDB = require("./config/MongoDB"); 
+const MongoDB = require("./config/MongoDB"); 
 const app = express();
 const config  = require('dotenv').config();
 app.set('view options', { pretty: true });
