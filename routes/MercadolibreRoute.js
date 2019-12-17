@@ -27,17 +27,17 @@ router.get("/login", async function (req, res) {
 
 //items
 router.post("/item", async (req, res) => {
-    const add = await meli.addProduct(req.body, true, 1.13, 1.28, access_token);
+    const add = await meli.addProduct(req.body, true, 1.13, 1.28, req.session.access_token);
     res.status(200).send({ add });
 });
 
 router.put("/item", async (req, res) => {
-    const edit = await meli.editProduct(req.body, true, 1.13, 1.28, access_token);
+    const edit = await meli.editProduct(req.body, true, 1.13, 1.28, req.session.access_token);
     res.status(200).send({ edit });
 });
 
 router.get("/item/:id", async (req, res) => {
-    const get = await meli.getItem(req.params.id, access_token);
+    const get = await meli.getItem(req.params.id, req.session.access_token);
     res.status(200).send({ get });
 });
 
@@ -48,12 +48,12 @@ router.get('/list-to-update-meli', async (req, res) => {
     i = 0;
     items.forEach(async (item) => {
         if (item.mercadolibre.length === 0) {
-            await meli.addItem(item, true, 1.28, "gold_pro", access_token);
-            await meli.addItem(item, true, 1.13, "gold_special", access_token);
+            await meli.addItem(item, true, 1.28, "gold_pro", req.session.access_token);
+            await meli.addItem(item, true, 1.13, "gold_special", req.session.access_token);
         } else {
             item.mercadolibre.forEach(async (meli_item) => {
                 const percent = (meli_item.type == "gold_pro") ? 1.28 : 1.13;
-                await meli.editItem(meli_item.code, item, true, percent, meli_item.type, access_token);
+                await meli.editItem(meli_item.code, item, true, percent, meli_item.type, req.session.access_token);
                 // console.log(meli_item);
             })
         }
@@ -66,8 +66,8 @@ router.get('/change-all-status-item', async (req, res) => {
     var items = await ProductController.list();
     const obj = [];
     items.forEach(async (item) => {
-        await meli.changeState(item.code.mercadolibre_premium, 'paused', access_token);
-        await meli.changeState(item.code.mercadolibre_classic, 'paused', access_token);
+        await meli.changeState(item.code.mercadolibre_premium, 'paused', req.session.access_token);
+        await meli.changeState(item.code.mercadolibre_classic, 'paused', req.session.access_token);
     })
     res.status(200).send({ obj });
 })
