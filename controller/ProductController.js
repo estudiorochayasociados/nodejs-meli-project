@@ -6,6 +6,7 @@ exports.getItemWeb = async (link) => {
         .then((response) => {
             response = response.data;
             response.forEach(item => {
+                console.log(item);
                 ProductsModel.findOne({ 'code.web': item.data.cod }, (err, response) => {
                     if (err) console.log(err)
                     if (response) {
