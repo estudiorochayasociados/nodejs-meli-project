@@ -1,5 +1,5 @@
 const axios = require('axios');
-const User = require('../model/User');
+const User = require('../model/UserModel');
 
 exports.create =  (json) => {
     console.log(json);
