@@ -133,8 +133,7 @@ exports.addItem = async (data, addShipping, percentPrice, type, token) => {
     itemMeli.attributes.push({"id": "EAN","name": "EAN","value_id": null,"value_name": "7794940000796"});
     data.images.forEach(img => {
         itemMeli.pictures.push({ source: img.source });
-    });    
-    itemMeli.pictures.push({ source: "https://www.morano.com.ar/assets/img/logo.png" });
+    });        
     itemMeli.video_id = data.description.video;
     itemMeli.listing_type_id = type;
     itemMeli.category_id = category.id;
@@ -177,8 +176,7 @@ exports.editItem = async (itemId, data, addShipping, percentPrice, type, token) 
     itemMeli.attributes.push({"id": "EAN","name": "EAN","value_id": null,"value_name": "7794940000796"});
     data.images.forEach(img => {
         itemMeli.pictures.push({ source: img.source });
-    });    
-    itemMeli.pictures.push({ source: "https://www.morano.com.ar/assets/img/logo.png" });
+    });        
 
     //AGREGAR ITEM EN TIPO PREMIUM
     await axios.put("https://api.mercadolibre.com/items/" + itemId + "?access_token=" + token, itemMeli)

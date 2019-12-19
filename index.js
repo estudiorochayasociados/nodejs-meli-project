@@ -2,10 +2,9 @@ const express = require("express");
 const morgan = require("morgan");
 const session = require("express-session");
 const MongoDB = require("./config/MongoDB"); 
-const app = express();
 const config  = require('dotenv').config();
+const app = express();
 app.set('view options', { pretty: true });
-
 //settings
 app.set('trust proxy', 1) // trust first proxy
 app.use(

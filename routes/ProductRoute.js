@@ -2,9 +2,10 @@ const express = require('express');
 const ProductController = require('../controller/ProductController');
 var router = express.Router();
 
-router.get("/getItemWeb", async (req, res) => {
-    const get = await ProductController.getItemWeb("https://www.morano.com.ar/api/products/list-json.php");
-    res.status(200).send({ get });
+router.get("/update-products-with-web", async (req, res) => {
+    var get = await ProductController.updateProductsWithWeb(config.parsed.JSON_PRODUCT);
+    console.log(get);
+    res.send(get);
 })
 
 router.get("/", async (req, res) => {
