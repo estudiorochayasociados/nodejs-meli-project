@@ -8,8 +8,8 @@ var router = express.Router();
 
 router.get("/auth", async function (req, res) {
     const url = await MercadolibreController.getUrlAuth(process.env.APP_ID, process.env.REDIRECT_URI + "/mercadolibre/login");
-    //res.redirect(url);
-    res.send(url);
+    res.redirect(url);
+    //res.send(url);
 });
 
 router.get("/login", async function (req, res) {
