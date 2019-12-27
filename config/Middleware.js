@@ -5,6 +5,6 @@ exports.refreshToken = (async () => {
     await axios.get(process.env.URL + "/mercadolibre/refresh-token").then(r => { console.log(r.data) });
 });
 
-cron.schedule("* 10 * * * *", async () => {
+cron.schedule("* 45 * * * *", async () => {
     await this.refreshToken();
 });

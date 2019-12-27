@@ -5,6 +5,7 @@ const TokenController = require('../controller/TokenController');
 //AUTH LOGIN
 exports.getUrlAuth = async (app_id, redirect_uri) => {
     return "http://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=" + app_id + "&redirect_uri=" + redirect_uri;
+    
 }
 
 exports.auth = async (code, redirect_uri) => {
