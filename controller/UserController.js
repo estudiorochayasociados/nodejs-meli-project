@@ -1,11 +1,28 @@
-const axios = require('axios');
-const User = require('../model/UserModel');
+const UserModel = require('../model/UserModel');
 
-exports.create =  (json) => {
-    console.log(json);
-    const data = new User(json);
-    data.save(function(err, body) {
-        if(err) console.log(err)
-        console.log(body)
-    });
+exports.list = async () => {
+    return UserModel.find();
+}
+
+exports.create = (item) => {
+    var data = new UserModel(item);
+    data.save(function (err, body) {
+        if (err) console.log(err);
+        return body
+    })
+};
+
+exports.update = (item) => {
+    return UserModel.findOneAndUpdate({ '_id': item._id }, { $set: item }, { new: true }, function (err, body) {
+        if (err) console.log(err)
+        return body
+    })
+};
+
+exports.view = function (user_id) {
+    return UserModel.findOne({ '_id': ObjectId(user_id)}, (err, res) => { return res });
+};
+ 
+exports.delete = function (user_id) {
+    return UserModel.deleteOne({ '_id': ObjectId(user_id)}, (err, res) => { return res });
 };

@@ -1,46 +1,55 @@
-const ProductController = require("./ProductController")
 const axios = require('axios');
 const ProductsModel = require('../model/ProductModel');
+const TokenController = require('../controller/TokenController');
 
 //AUTH LOGIN
 exports.getUrlAuth = async (app_id, redirect_uri) => {
     return "http://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=" + app_id + "&redirect_uri=" + redirect_uri;
 }
 
-exports.auth = async (id, secret, code, redirect_uri) => {
-    return axios.post('https://api.mercadolibre.com/oauth/token?grant_type=authorization_code',
+exports.auth = async (code, redirect_uri) => {
+    return await axios.post('https://api.mercadolibre.com/oauth/token?grant_type=authorization_code',
         {
-            client_id: id,
-            client_secret: secret,
+            client_id: process.env.APP_ID,
+            client_secret: process.env.APP_SECRET,
             code: code,
             redirect_uri: redirect_uri
         })
-        .then(response => {
+        .then(async response => {
+            console.log(response);
+            await TokenController.update(response.data);
             return response.data
         })
         .catch(error => {
-            console.log(error);
+            console.log(error.data);
         })
 }
 
-exports.refreshToken = async (id, secret, refresh_token) => {
-    return axios.post('https://api.mercadolibre.com/oauth/token?grant_type=refresh_token',
-        {
-            client_id: id,
-            client_secret: secret,
-            refresh_token: refresh_token
-        })
+exports.checkToken = async (access_token) => {
+    return await axios.get("https://api.mercadolibre.com/users/me?access_token=" + access_token)
         .then(response => {
-            return response.data
+            return response.data;
         })
-        .catch(error => {
-            console.log(error);
+        .catch(async error => {
+            return await this.refreshToken();
         })
+}
+
+exports.refreshToken = async () => {
+    const token = await TokenController.view(process.env.USER_ID);
+    return await axios.post("https://api.mercadolibre.com/oauth/token?grant_type=refresh_token&client_id=" + process.env.APP_ID + "&client_secret=" + process.env.APP_SECRET + "&refresh_token=" + token.refresh_token)
+        .then(async r => {
+            await TokenController.update(r.data);
+            return r.data
+        })
+        .catch(e => {
+            return e.data
+        });
 }
 
 //ORDERS
-exports.getOrders = async (token, seller_id, page) => {
-    return await axios.get("https://api.mercadolibre.com/orders/search?seller=" + seller_id + "&offset=" + page + "&access_token=" + token)
+exports.getOrders = async (token, page) => {
+    return await axios.get("https://api.mercadolibre.com/orders/search?seller=" + process.env.USER_ID + "&offset=" + page + "&access_token=" + token)
         .then(response => {
             return response.data.results;
         })
@@ -130,30 +139,24 @@ exports.addItem = async (data, addShipping, percentPrice, type, token) => {
     itemMeli.description = { plain_text: data.description.text };
     itemMeli.pictures = [];
     itemMeli.attributes = [];
-    itemMeli.attributes.push({"id": "EAN","name": "EAN","value_id": null,"value_name": "7794940000796"});
+    itemMeli.attributes.push({ "id": "EAN", "name": "EAN", "value_id": null, "value_name": "7794940000796" });
     data.images.forEach(img => {
         itemMeli.pictures.push({ source: img.source });
-    });        
+    });
     itemMeli.video_id = data.description.video;
     itemMeli.listing_type_id = type;
     itemMeli.category_id = category.id;
 
-    //AGREGAR ITEM EN TIPO PREMIUM
-    await axios.post("https://api.mercadolibre.com/items?access_token=" + token, itemMeli)
-        .then(response => {
-            console.log(response.data);
-            ProductsModel.findOne({ "code.web": data.code.web }, (err, product) => {
-                const meli_id = response.data.id;
-                product.mercadolibre.push({ type: type, code: response.data.id, price: itemMeli.price, percent: percentPrice });
-                product.save((err) => {
-                    if(err) console.log(err);
-                });
-            });
-            return true;
-        })
-        .catch(e => {
-            //console.log(e.response.data);
-        })
+    try {
+        const itemPost = await axios.post("https://api.mercadolibre.com/items?access_token=" + token, itemMeli);
+        const findMongoDb = await ProductsModel.findOne({ "code.web": data.code.web });
+        await findMongoDb.mercadolibre.push({ type: type, shipping: addShipping, code: itemPost.data.id, price: itemMeli.price, percent: percentPrice });
+        await findMongoDb.save();
+        return ({ status: 200, title: itemMeli.title, type: type, shipping: addShipping, code: itemPost.data.id, price: itemMeli.price, percent: percentPrice });
+    }
+    catch (e) {
+        return ({ status: 400, title: itemMeli.title, error: e.response.data });
+    }
 }
 
 exports.editItem = async (itemId, data, addShipping, percentPrice, type, token) => {
@@ -167,35 +170,28 @@ exports.editItem = async (itemId, data, addShipping, percentPrice, type, token) 
 
     //CREATE OBJETO MELI
     const itemMeli = {};
-    itemMeli.title = data.title;
     itemMeli.available_quantity = (data.stock) ? data.stock : 1;
     itemMeli.price = ((data.price.default * percentPrice) + shipping).toFixed(2);
     itemMeli.video_id = data.description.video;
     itemMeli.pictures = [];
     itemMeli.attributes = [];
-    itemMeli.attributes.push({"id": "EAN","name": "EAN","value_id": null,"value_name": "7794940000796"});
+    itemMeli.attributes.push({ "id": "EAN", "name": "EAN", "value_id": null, "value_name": "7794940000796" });
     data.images.forEach(img => {
         itemMeli.pictures.push({ source: img.source });
-    });        
+    });
 
-    //AGREGAR ITEM EN TIPO PREMIUM
-    await axios.put("https://api.mercadolibre.com/items/" + itemId + "?access_token=" + token, itemMeli)
-        .then(response => {
-            //console.log(response.data);
-            ProductsModel.findOne({ "mercadolibre.code" : itemId }, (err, product) => {                
-                indexMeliObject = product.mercadolibre.findIndex(x => x.code === itemId);
-                product.mercadolibre.splice(indexMeliObject,1);
-                product.mercadolibre.push({ type: type, code: itemId, price: itemMeli.price, percent: percentPrice });
-                product.save(function (err) {
-                    if (err) { console.log(err) }
-                });
-
-            });
-            return response;
-        })
-        .catch(e => {
-            console.log(e.response.data);
-        })
+    try {
+        const itemPost = await axios.put("https://api.mercadolibre.com/items/" + itemId + "?access_token=" + token, itemMeli);
+        const findMongoDb = await ProductsModel.findOne({ "code.web": data.code.web });
+        indexMeliObject = await findMongoDb.mercadolibre.findIndex(x => x.code === itemId);
+        await findMongoDb.mercadolibre.splice(indexMeliObject, 1);
+        await findMongoDb.mercadolibre.push({ type: type, shipping: addShipping, code: itemId, price: itemMeli.price, percent: percentPrice });
+        await findMongoDb.save();
+        return ({ status: 200, title: data.title, type: type, shipping: addShipping, code: itemPost.data.id, price: itemMeli.price, percent: percentPrice });
+    }
+    catch (e) {
+        return ({ status: 400, title: data.title, error: e.response.data });
+    }  
 }
 
 exports.editProductDescription = (item_id, data, token) => {

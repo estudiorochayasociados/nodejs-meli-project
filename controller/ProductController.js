@@ -1,10 +1,11 @@
 const axios = require('axios');
 const ProductsModel = require('../model/ProductModel');
- 
+
 exports.updateProductsWithWeb = async (link) => { 
     var add = [];
     var update = [];
     var totalArray = [];
+    this.setStock(0);
     return axios.get(link)
         .then(async r => {
             console.log("start");
@@ -14,15 +15,16 @@ exports.updateProductsWithWeb = async (link) => {
                     const images = [];
                     itemSearch.title = item.data.titulo;
                     itemSearch.description.text = item.data.desarrollo;
-                    itemSearch.description.video = "https://youtu.be/HKTa9jnsoZ4";
+                    itemSearch.description.video =  process.env.VIDEO_ITEM;
                     itemSearch.stock = (item.data.stock) ? item.data.stock : 1;
                     itemSearch.code.web = item.data.cod;
                     itemSearch.price.default = item.data.precio;
                     itemSearch.category = item.category.data.titulo;
                     itemSearch.subcategory = item.category.subcategories[0].data.titulo;
                     item.images.forEach(img => {
-                        images.push({ "source": img.ruta, "order": img.orden })
+                        images.push({ "source": "https://www.morano.com.ar/" + img.ruta, "order": img.orden })
                     });
+                    images.push({ "source": "https://www.morano.com.ar/assets/img/logo.png", "order": 1 })
                     itemSearch.images = images;
                     this.update(itemSearch);
                     update.push({product:itemSearch.title});
@@ -34,18 +36,19 @@ exports.updateProductsWithWeb = async (link) => {
                     const images = [];
                     data.title = item.data.titulo;
                     data.description.text = item.data.desarrollo;
-                    data.description.video = "https://youtu.be/HKTa9jnsoZ4";
+                    data.description.video =  process.env.VIDEO_ITEM;
                     data.stock = (item.data.stock) ? item.data.stock : 1;
                     data.code.web = item.data.cod;
                     data.price.default = item.data.precio;
                     data.category = item.category.data.titulo;
                     data.subcategory = item.category.subcategories[0].data.titulo;
                     item.images.forEach(img => {
-                        images.push({ "source": img.ruta, "order": img.orden })
+                        images.push({ "source": "https://www.morano.com.ar/" + img.ruta, "order": img.orden })
                     });
+                    images.push({ "source": "https://www.morano.com.ar/assets/img/logo.png", "order": 1 })
                     data.images = images;
                     this.create(data);
-                    add.push({product:item.title});                    
+                    add.push({product:data.title});                    
                 }
             } 
             totalArray.push({"add" : add, "update" : update});
@@ -76,3 +79,7 @@ exports.update = (item) => {
 exports.view = function (codigo) {
     return ProductsModel.findOne({ 'code.web': codigo }, (err, res) => { return res });
 };
+
+exports.setStock = function(stock) {
+    return ProductsModel.updateMany({}, { stock: stock })
+}

@@ -45,7 +45,10 @@ const Product = new Schema({
     },
     date: {
         created_at: { type: Date },
-        updated_at: { type: Date, default: Date.now }
+        updated_at: { 
+            type: Date, 
+            default: Date.now
+        }
     }
 },{ 
     versionKey: false 

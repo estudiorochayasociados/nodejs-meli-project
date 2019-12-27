@@ -1,15 +1,12 @@
 const express = require("express");
-const morgan = require("morgan");
-const session = require("express-session");
-const MongoDB = require("./config/MongoDB"); 
-const config  = require('dotenv').config();
+const config = require("./config"); 
 const app = express();
-app.set('view options', { pretty: true });
+
 //settings
 app.set('trust proxy', 1) // trust first proxy
 app.use(
-    session({
-        secret: config.parsed.SESSION_SECRET,
+    config.session({
+        secret: process.env.SESSION_SECRET,
         resave: false,
         maxAge: 3000000,
         saveUninitialized: true,
@@ -17,12 +14,20 @@ app.use(
     })
 );
 app.locals.pretty = true;
-app.use(morgan('dev'));
+app.use(config.morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(config.cors());
 
-app.listen(process.env.PORT || config.parsed.PORT);
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*"); 
+    next();
+});
+
+app.listen(process.env.PORT);
 
 //Routes
 app.use('/mercadolibre', require("./routes/MercadolibreRoute"));
 app.use('/product', require("./routes/ProductRoute"));
+app.use('/user', require("./routes/UserRoute"));
+
