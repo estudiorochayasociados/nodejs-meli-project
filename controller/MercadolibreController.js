@@ -48,14 +48,6 @@ exports.refreshToken = async () => {
         });
 }
 
-//ORDERS
-exports.getOrders = async (token, page) => {
-    return await axios.get("https://api.mercadolibre.com/orders/search?seller=" + process.env.USER_ID + "&offset=" + page + "&access_token=" + token)
-        .then(response => {
-            return response.data.results;
-        })
-}
-
 //CATEGORIES 
 exports.getPredictionCategory = async (title) => {
     return axios.get("https://api.mercadolibre.com/sites/MLA/category_predictor/predict?title=" + title)
@@ -105,22 +97,6 @@ exports.shippingPriceByDimension = async (dimension) => {
             console.log(e.response.data);
         })
 }
-
-//PRODUCTS
-exports.getItem = (item_id, token) => {
-    return axios.get("https://api.mercadolibre.com/items/" + item_id + "?access_token=" + token)
-        .then(response => {
-            return response.data;
-        })
-        .catch((error) => {
-            if (error.response) {
-                return error.response
-            }
-            return "Problem submitting New Post", error;
-        });
-}
-
-
 
 exports.addItem = async (data, addShipping, percentPrice, type, token) => {
     //PREDICCION DE LA CATEGORIA VIA TITULO
@@ -195,28 +171,15 @@ exports.editItem = async (itemId, data, addShipping, percentPrice, type, token) 
     }  
 }
 
-exports.editProductDescription = (item_id, data, token) => {
-    return axios.put("https://api.mercadolibre.com/items/" + item_id + "/description?access_token=" + token, data)
-        .then(response => {
-            return response.data;
-        })
-        .catch((error) => {
-            if (error.response) {
-                return error.response
-            }
-            return "Problem submitting New Post", error;
-        });
-}
-
 exports.changeState = (item_id, status, token) => {
     return axios.put("https://api.mercadolibre.com/items/" + item_id + "?access_token=" + token, { "status": status })
         .then(response => {
-            return response.data;
+            console.log(response.data);
         })
         .catch((error) => {
             if (error.response) {
-                return error.response
+                console.log(error.response);
             }
-            return "Problem submitting New Post", error;
+            console.log("Problem submitting New Post", error);
         });
 }

@@ -4,12 +4,14 @@ exports.list = async () => {
     return UserModel.find();
 }
 
-exports.create = (item) => {
-    var data = new UserModel(item);
-    data.save(function (err, body) {
-        if (err) console.log(err);
-        return body
-    })
+exports.create = (body) => {
+    var data = new UserModel({
+        email: body.email,
+        password: body.password
+    });
+    return data.save()
+        .then(saved => { return { status:200, data: saved }})
+        .catch(err => { return { status:500, data: err.message }});
 };
 
 exports.update = (item) => {
@@ -20,9 +22,15 @@ exports.update = (item) => {
 };
 
 exports.view = function (user_id) {
-    return UserModel.findOne({ '_id': ObjectId(user_id)}, (err, res) => { return res });
+    return UserModel.findOne({ '_id': ObjectId(user_id) }, (err, res) => { return res });
 };
- 
+
+exports.login = function (email, password) {
+    return UserModel.findOne({ 'email': email, 'password': password }, (err, res) => {
+        return res
+    });
+};
+
 exports.delete = function (user_id) {
-    return UserModel.deleteOne({ '_id': ObjectId(user_id)}, (err, res) => { return res });
+    return UserModel.deleteOne({ '_id': ObjectId(user_id) }, (err, res) => { return res });
 };

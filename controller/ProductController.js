@@ -8,7 +8,6 @@ exports.updateProductsWithWeb = async (link) => {
     this.setStock(0);
     return axios.get(link)
         .then(async r => {
-            console.log("start");
             for await (const item of r.data) {
                 var itemSearch = await this.view(item.data.cod);                
                 if (itemSearch) {
@@ -52,7 +51,6 @@ exports.updateProductsWithWeb = async (link) => {
                 }
             } 
             totalArray.push({"add" : add, "update" : update});
-            console.log("end");
             return await totalArray;
         }) 
 }

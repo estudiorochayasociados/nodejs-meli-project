@@ -1,28 +1,45 @@
 const express = require('express');
 const UserController = require('../controller/UserController');
-var router = express.Router();
+const Middelware = require("../config/Middleware");
+const jwt = require('jsonwebtoken');
+const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", Middelware.checkToken, async (req, res) => {
     const get = await UserController.list();
     res.status(200).send(get);
 })
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", Middelware.checkToken ,async (req, res) => {
     let view = await UserController.view(req.params.id);
     res.status(200).json(view);
 })
 
-router.post("/", async (req, res) => {
-    const get = await UserController.create(req.body);
-    res.status(200).send({ get });
+router.post("/", Middelware.checkToken, async (req, res) => {
+    const response = await UserController.create(req.body);
+    res.status(200).send({ response });
+})
+ 
+router.post('/auth', async (req, res) => {
+    const login = await UserController.login(req.body.email, req.body.password);
+    if (login) {
+        const token = jwt.sign({check:true}, process.env.JWT, {
+            expiresIn: 1440
+        });
+        res.json({
+            message: 'Autenticación correcta',
+            token: token
+        });
+    } else {
+        res.json({ error: "Usuario o contraseña incorrectos" })
+    }
 })
 
-router.put("/", async (req, res) => {
-    const get = await UserController.update(req.body);
-    res.status(200).send({ get });
+router.put("/", Middelware.checkToken, async (req, res) => {
+    let view = await UserController.view(req.params.id);
+    res.status(200).json(view);
 })
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", Middelware.checkToken, async (req, res) => {
     let del = await UserController.delete(req.params.id);
     res.status(200).json(del);
 })
