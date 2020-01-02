@@ -149,7 +149,7 @@ exports.editItem = async (itemId, data, addShipping, percentPrice, type, token) 
 
     if (!data.stock) {
         await this.changeState(itemId, 'paused', token);
-        return ({ status: 400, title: data.title, error: "Anuncio pausado por bajo stock" });
+        return ({ status: 200, title: data.title, error: { message: "Anuncio pausado por bajo stock" }});
     } else {
         await this.changeState(itemId, 'active', token);
         //CREATE OBJETO MELI
