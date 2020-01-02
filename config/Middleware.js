@@ -7,6 +7,7 @@ exports.refreshToken = (async () => {
 });
 
 exports.checkToken = ((req, res, next) => {
+    console.log(process.env);
     const token = req.headers['access-token'];
     if (token) {
         jwt.verify(token, process.env.JWT, (err, decoded) => {
