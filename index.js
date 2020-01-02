@@ -13,8 +13,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.listen(process.env.PORT);
-console.log(process.env);
+app.listen(process.env.PORT); 
 //Routes
 app.use('/mercadolibre', require("./routes/MercadolibreRoute"));
 app.use('/product', require("./routes/ProductRoute"));
