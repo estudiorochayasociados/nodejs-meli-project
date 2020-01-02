@@ -4,7 +4,7 @@ const Middelware = require("../config/Middleware");
 const ProductController = require('../controller/ProductController');
 const router = express.Router();
 
-router.get("/update-products-with-web",Middelware.checkToken, async (req, res) => {
+router.get("/update-products-with-web", Middelware.checkToken, async (req, res) => {
     var get = await ProductController.updateProductsWithWeb(config.parsed.JSON_PRODUCT);
     console.log(get);
     res.send(get);

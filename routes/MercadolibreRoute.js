@@ -5,26 +5,26 @@ const TokenController = require('../controller/TokenController');
 const router = express.Router();
 
 //login user
-router.get("/auth", Middleware.checkToken, async function (req, res) {
+router.get("/auth", async function (req, res) {
     const url = await MercadolibreController.getUrlAuth(process.env.APP_ID, process.env.REDIRECT_URI + "/mercadolibre/login");
     res.redirect(url);    
 });
 
-router.get("/login", Middleware.checkToken, async function (req, res) {
+router.get("/login", async function (req, res) {
     const auth = await MercadolibreController.auth(req.query.code, process.env.REDIRECT_URI + "/mercadolibre/login");
     if (auth) {
         res.json(auth)
     }
 });
 
-router.get("/refresh-token", Middleware.checkToken, async (req, res) => {
-    const token = await TokenController.list(process.env.USER_ID); //get token mongodb
-    await token.forEach(async tk => {
-        const reAuth = await MercadolibreController.checkToken(tk.access_token);
-        if (reAuth) {
-            res.json(reAuth)
-        }
-    })
+router.get("/refresh-token", async (req, res) => {
+    const token = await TokenController.view(process.env.USER_ID); //get token mongodb
+    const reAuth = await MercadolibreController.checkToken(token.access_token);     
+    if(reAuth) {
+        res.json(reAuth)
+    } else {
+        res.send(400);
+    }
 });
 
 //items

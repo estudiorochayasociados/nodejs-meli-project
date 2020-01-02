@@ -5,7 +5,7 @@ const TokenController = require('../controller/TokenController');
 //AUTH LOGIN
 exports.getUrlAuth = async (app_id, redirect_uri) => {
     return "http://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=" + app_id + "&redirect_uri=" + redirect_uri;
-    
+
 }
 
 exports.auth = async (code, redirect_uri) => {
@@ -27,12 +27,14 @@ exports.auth = async (code, redirect_uri) => {
 }
 
 exports.checkToken = async (access_token) => {
+    console.log(access_token);
     return await axios.get("https://api.mercadolibre.com/users/me?access_token=" + access_token)
         .then(response => {
             return response.data;
         })
         .catch(async error => {
-            return await this.refreshToken();
+            const refreshToken = await this.refreshToken();
+            return refreshToken;
         })
 }
 
@@ -40,10 +42,12 @@ exports.refreshToken = async () => {
     const token = await TokenController.view(process.env.USER_ID);
     return await axios.post("https://api.mercadolibre.com/oauth/token?grant_type=refresh_token&client_id=" + process.env.APP_ID + "&client_secret=" + process.env.APP_SECRET + "&refresh_token=" + token.refresh_token)
         .then(async r => {
+            console.log(r);
             await TokenController.update(r.data);
             return r.data
         })
         .catch(e => {
+            console.log(e);
             return e.data
         });
 }
@@ -143,32 +147,36 @@ exports.editItem = async (itemId, data, addShipping, percentPrice, type, token) 
     //CALCULAR PRECIO ME2 X CATEGORIA
     var shipping = (addShipping === true && category.dimensions !== 0) ? await this.shippingPriceByDimension(category.dimensions) : 0;
 
-    await this.changeState(itemId, 'active', token);
+    if (!data.stock) {
+        await this.changeState(itemId, 'paused', token);
+        return ({ status: 400, title: data.title, error: "Anuncio pausado por bajo stock" });
+    } else {
+        await this.changeState(itemId, 'active', token);
+        //CREATE OBJETO MELI
+        const itemMeli = {};
+        itemMeli.available_quantity = data.stock;
+        itemMeli.price = ((data.price.default * percentPrice) + shipping).toFixed(2);
+        itemMeli.video_id = data.description.video;
+        itemMeli.pictures = [];
+        itemMeli.attributes = [];
+        itemMeli.attributes.push({ "id": "EAN", "name": "EAN", "value_id": null, "value_name": "7794940000796" });
+        data.images.forEach(img => {
+            itemMeli.pictures.push({ source: img.source });
+        });
 
-    //CREATE OBJETO MELI
-    const itemMeli = {};
-    itemMeli.available_quantity = (data.stock) ? data.stock : 1;
-    itemMeli.price = ((data.price.default * percentPrice) + shipping).toFixed(2);
-    itemMeli.video_id = data.description.video;
-    itemMeli.pictures = [];
-    itemMeli.attributes = [];
-    itemMeli.attributes.push({ "id": "EAN", "name": "EAN", "value_id": null, "value_name": "7794940000796" });
-    data.images.forEach(img => {
-        itemMeli.pictures.push({ source: img.source });
-    });
-
-    try {
-        const itemPost = await axios.put("https://api.mercadolibre.com/items/" + itemId + "?access_token=" + token, itemMeli);
-        const findMongoDb = await ProductsModel.findOne({ "code.web": data.code.web });
-        indexMeliObject = await findMongoDb.mercadolibre.findIndex(x => x.code === itemId);
-        await findMongoDb.mercadolibre.splice(indexMeliObject, 1);
-        await findMongoDb.mercadolibre.push({ type: type, shipping: addShipping, code: itemId, price: itemMeli.price, percent: percentPrice });
-        await findMongoDb.save();
-        return ({ status: 200, title: data.title, type: type, shipping: addShipping, code: itemPost.data.id, price: itemMeli.price, percent: percentPrice });
+        try {
+            const itemPost = await axios.put("https://api.mercadolibre.com/items/" + itemId + "?access_token=" + token, itemMeli);
+            const findMongoDb = await ProductsModel.findOne({ "code.web": data.code.web });
+            indexMeliObject = await findMongoDb.mercadolibre.findIndex(x => x.code === itemId);
+            await findMongoDb.mercadolibre.splice(indexMeliObject, 1);
+            await findMongoDb.mercadolibre.push({ type: type, shipping: addShipping, code: itemId, price: itemMeli.price, percent: percentPrice });
+            await findMongoDb.save();
+            return ({ status: 200, title: data.title, type: type, shipping: addShipping, code: itemPost.data.id, price: itemMeli.price, percent: percentPrice });
+        }
+        catch (e) {
+            return ({ status: 400, title: data.title, error: e.response.data });
+        }
     }
-    catch (e) {
-        return ({ status: 400, title: data.title, error: e.response.data });
-    }  
 }
 
 exports.changeState = (item_id, status, token) => {

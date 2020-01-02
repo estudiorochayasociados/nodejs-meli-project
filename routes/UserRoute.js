@@ -9,6 +9,12 @@ router.get("/", Middelware.checkToken, async (req, res) => {
     res.status(200).send(get);
 })
 
+router.get("/check-token",Middelware.checkToken, (req, res) => {
+    console.log(req);
+    res.status(200).json({"status":true});
+})
+ 
+
 router.get("/:id", Middelware.checkToken ,async (req, res) => {
     let view = await UserController.view(req.params.id);
     res.status(200).json(view);
@@ -23,7 +29,7 @@ router.post('/auth', async (req, res) => {
     const login = await UserController.login(req.body.email, req.body.password);
     if (login) {
         const token = jwt.sign({check:true}, process.env.JWT, {
-            expiresIn: 1440
+            expiresIn: "1h"
         });
         res.json({
             message: 'Autenticación correcta',
